@@ -46,7 +46,7 @@ func NewExporter(token string, namespace string) *Exporter {
 				Name:      "monitor_active",
 				Help:      "Probe active (0==paused, 1==active)",
 			},
-			[]string{"project_id", "monitor_id", "name", "protocol"},
+			[]string{"project_id", "monitor_id", "name", "protocol", "url"},
 		),
 		metricMonitorStatus: prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
@@ -54,7 +54,7 @@ func NewExporter(token string, namespace string) *Exporter {
 				Name:      "monitor_status",
 				Help:      "Probe status (0==down, 1==up)",
 			},
-			[]string{"project_id", "monitor_id", "name", "protocol"},
+			[]string{"project_id", "monitor_id", "name", "protocol", "url"},
 		),
 	}
 }
@@ -77,8 +77,8 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	}
 
 	for _, m := range monitors {
-		e.metricMonitorActive.WithLabelValues(m.ProjectUUID, m.UUID, m.Name, m.Protocol).Set(lo.Ternary(!m.Paused, 1.0, 0.0))
-		e.metricMonitorStatus.WithLabelValues(m.ProjectUUID, m.UUID, m.Name, m.Protocol).Set(lo.Ternary(m.Status == "up", 1.0, 0.0))
+		e.metricMonitorActive.WithLabelValues(m.ProjectUUID, m.UUID, m.Name, m.Protocol, m.URL).Set(lo.Ternary(!m.Paused, 1.0, 0.0))
+		e.metricMonitorStatus.WithLabelValues(m.ProjectUUID, m.UUID, m.Name, m.Protocol, m.URL).Set(lo.Ternary(m.Status == "up", 1.0, 0.0))
 	}
 
 	e.metricScrapeFailures.Collect(ch)
